@@ -1,6 +1,6 @@
 export const translations = {
   en: {
-    welcome: 'Welcome to SkyLink ISP',
+    welcome: 'Welcome to Rayhan ISP',
     customer: 'Customer',
     admin: 'Admin',
     login: 'Login',
@@ -32,7 +32,7 @@ export const translations = {
     currency: '৳',
   },
   bn: {
-    welcome: 'স্কাইলিংক আইএসপিতে স্বাগতম',
+    welcome: 'Rayhan আইএসপিতে স্বাগতম',
     customer: 'গ্রাহক',
     admin: 'অ্যাডমিন',
     login: 'লগইন',

@@ -53,7 +53,7 @@ export const CustomerLoginScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.colors.background }]}>
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.colors.text }]}>
+        <Text style={[styles.title, { color: colors.colors.primary }]}>
           {t.customer} {t.login}
         </Text>
         

@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   const t = translations[language];
   
   return (
-    <View style={[styles.header, { backgroundColor: colors.colors.background }]}>
+    <View style={[styles.header, { backgroundColor: colors.colors.primary }]}>
       <View style={styles.left}>
         <Image 
           source={{ uri: 'https://via.placeholder.com/40x40/2563EB/FFFFFF?text=SL' }}
@@ -65,8 +65,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 0,
+    paddingVertical: 30,
+    paddingBottom: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },

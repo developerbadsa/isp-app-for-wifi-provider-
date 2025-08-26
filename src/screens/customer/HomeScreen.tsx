@@ -49,7 +49,9 @@ export const HomeScreen: React.FC = () => {
           <View style={styles.userInfo}>
             <View style={styles.userDetails}>
               <Text style={[styles.userName, { color: colors.colors.text }]}>
-                {user?.name}
+                {/* {user?.name} */}
+
+                Rahim Badsa
               </Text>
               <Text style={[styles.loginId, { color: colors.colors.textSecondary }]}>
                 ID: {user?.loginId}
@@ -60,7 +62,7 @@ export const HomeScreen: React.FC = () => {
         </Card>
         
         {/* Quick Actions */}
-        <Text style={[styles.sectionTitle, { color: colors.colors.text }]}>
+        <Text style={[styles.sectionTitle, { color: colors.colors.primary }]}>
           Quick Actions
         </Text>
         <View style={styles.actionsGrid}>
@@ -134,7 +136,7 @@ export const HomeScreen: React.FC = () => {
                 size={20} 
                 color={colors.colors.textSecondary} 
               />
-              <Text style={[styles.secondaryLabel, { color: colors.colors.text }]}>
+              <Text style={[styles.secondaryLabel, { color: colors.colors.textSecondary }]}>
                 {action.label}
               </Text>
               <Ionicons 

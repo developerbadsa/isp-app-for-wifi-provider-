@@ -20,8 +20,10 @@ export const WelcomeScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.colors.background }]}>
       <View style={styles.content}>
+
+        {/* Heading */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.colors.text }]}>
+          <Text style={[styles.title, { color: colors.colors.primary }]}>
             {t.welcome}
           </Text>
           <Text style={[styles.subtitle, { color: colors.colors.textSecondary }]}>
