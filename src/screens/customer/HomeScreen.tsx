@@ -7,11 +7,17 @@ import { translations } from '../../utils/i18n';
 import { Card } from '../../components/Card';
 import { StatusPill } from '../../components/StatusPill';
 import { Header } from '../../components/Header';
+import { useRouter } from "expo-router";
+
+// inside HomeScreen
+const router = useRouter();
+
 
 export const HomeScreen: React.FC = () => {
   const { theme, language, user, connectionStatus, expiryDate } = useAppStore();
   const colors = theme === 'light' ? lightTheme : darkTheme;
   const t = translations[language];
+  const router = useRouter();
   
   const [refreshing, setRefreshing] = React.useState(false);
   
@@ -28,9 +34,9 @@ export const HomeScreen: React.FC = () => {
   ];
   
   const secondaryActions = [
-    { icon: 'wifi-outline', label: 'Internet Packages' },
+    { icon: 'wifi-outline', label: 'Internet Packages', goto: 'packages'},
     { icon: 'receipt-outline', label: t.paymentHistory },
-    { icon: 'speedometer-outline', label: t.speedTest },
+    { icon: 'speedometer-outline', label: t.speedTest, goto: "/speedtest" },
     { icon: 'newspaper-outline', label: 'News & Events' },
   ];
   
@@ -49,9 +55,7 @@ export const HomeScreen: React.FC = () => {
           <View style={styles.userInfo}>
             <View style={styles.userDetails}>
               <Text style={[styles.userName, { color: colors.colors.text }]}>
-                {/* {user?.name} */}
-
-                Rahim Badsa
+                {user?.name}
               </Text>
               <Text style={[styles.loginId, { color: colors.colors.textSecondary }]}>
                 ID: {user?.loginId}
@@ -130,7 +134,7 @@ export const HomeScreen: React.FC = () => {
         {/* Secondary Actions */}
         <View style={styles.secondaryActions}>
           {secondaryActions.map((action, index) => (
-            <TouchableOpacity key={index} style={styles.secondaryAction}>
+            <TouchableOpacity key={index} style={styles.secondaryAction} onPress={() => router.push(action?.goto ? action?.goto : '/' )}>
               <Ionicons 
                 name={action.icon as any} 
                 size={20} 

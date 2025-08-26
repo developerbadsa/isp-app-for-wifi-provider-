@@ -18,7 +18,7 @@ export const CustomerLoginScreen: React.FC = () => {
   const [error, setError] = useState('');
   
   const handlePhoneSubmit = () => {
-    if (phone === '01700000000') {
+    if (phone === '01877104723') {
       setStep('otp');
       setError('');
     } else {
@@ -31,10 +31,10 @@ export const CustomerLoginScreen: React.FC = () => {
       const user = {
         id: '1',
         role: 'customer' as const,
-        name: 'John Doe',
+        name: 'Rahim Badsa',
         phone: phone,
         loginId: 'SKY001234',
-        avatar: 'https://via.placeholder.com/100x100/2563EB/FFFFFF?text=JD',
+        avatar: 'https://lh3.googleusercontent.com/a/ACg8ocLUy4YSsdIhgBg3rbDu-gX1njvVbw4tfz7Woehae_69YhsOPIP4=s288-c-no',
       };
       login(user);
       router.replace('/(customer)');
@@ -44,7 +44,7 @@ export const CustomerLoginScreen: React.FC = () => {
   };
   
   const useTestAccount = () => {
-    setPhone('01700000000');
+    setPhone('01877104723');
     if (step === 'otp') {
       setOtp('123456');
     }
