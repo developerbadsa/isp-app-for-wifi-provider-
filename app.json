@@ -1,45 +1,35 @@
 {
   "expo": {
     "name": "Rayhan ISP",
-    "slug": "navigation-mock-react",
+    "slug": "Rayhan-rahimbadsa723",
     "version": "1.0.0",
     "orientation": "portrait",
-    // "icon": "./assets/images/icon.png",
-    "scheme": "navigation-mock-react",
+    "scheme": "ayhan-rahimbadsa723",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
-      "adaptiveIcon": {
-        // "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+      "adaptiveIcon": { "backgroundColor": "#ffffff" },
+      "edgeToEdgeEnabled": true,
+      "package": "com.rahimbadsa723.navigationmockreact"
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      // "favicon": "./assets/images/favicon.png"
-    },
+    "web": { "bundler": "metro", "output": "static" },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          // "image": "./assets/images/splash-icon.png",
+          "image": "./src/assets/rahimbadsa.jpg",  
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
+    "experiments": { "typedRoutes": true },
+    "runtimeVersion": { "policy": "sdkVersion" },
+    "extra": {
+      "router": {},
+      "eas": { "projectId": "1b9d79f9-bea5-44c7-acac-4a3bdb0b79c5" }
     }
   }
 }

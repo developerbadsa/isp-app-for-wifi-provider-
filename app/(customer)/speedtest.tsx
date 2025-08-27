@@ -2,12 +2,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import { useAppStore } from '../../src/store';                 // adjust if your store path differs
-import { lightTheme, darkTheme } from '../../src/utils/theme.ts'; // adjust paths if needed
-import { Header } from '../../src/components/Header';          // optional, you already have this
-import { Card } from '../../src/components/Card';              // optional, for small stat cards
+import { useAppStore } from '../../src/store';                 
+import { lightTheme, darkTheme } from '../../src/utils/theme.ts'; 
+import { Header } from '../../src/components/Header';          
+import { Card } from '../../src/components/Card';           
 
-const ACCENT = '#e50914'; // red accent (Fast.com vibe)
+const ACCENT = '#e50914'; 
 const BIG = 72;
 
 const PING_URL = 'https://www.google.com/generate_204'; // tiny 204 response
