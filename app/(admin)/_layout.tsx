@@ -13,6 +13,8 @@ export default function AdminLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="customers" />
+      <Stack.Screen name="customer/[id]" />
+      <Stack.Screen name="subscriptions" />
       <Stack.Screen name="tickets" />
       <Stack.Screen name="invoices" />
       <Stack.Screen name="settings" />

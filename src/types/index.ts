@@ -1,5 +1,7 @@
 export type UserRole = 'customer' | 'admin';
 
+export type Language = 'en' | 'bn';
+
 export type ConnectionStatus = 'connected' | 'expiring' | 'past_due' | 'suspended';
 
 export type TicketStatus = 'pending' | 'resolved' | 'cancelled';
@@ -73,4 +75,41 @@ export interface Notification {
   date: string;
   isRead: boolean;
   type: 'maintenance' | 'billing' | 'general';
+}
+
+export interface CustomerUser {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  loginId: string;
+  clientCode: string;
+  zone: string;
+  subzone?: string;
+  address?: string;
+  packageName: string;
+  speed: number;
+  price: number;
+  status: ConnectionStatus;
+  expiryDate: string;
+  joiningDate: string;
+  uptime: string;
+  mac?: string;
+  ip?: string;
+  deviceVendor?: string;
+  lastLogin?: string;
+}
+
+export type ActivityLogType = 'login' | 'logout' | 'payment' | 'package' | 'connection' | 'ticket' | 'admin';
+
+export type ActivityLogLevel = 'success' | 'warning' | 'error' | 'info';
+
+export interface ActivityLog {
+  id: string;
+  userId: string;
+  type: ActivityLogType;
+  title: string;
+  detail?: string;
+  timestamp: string; // ISO datetime
+  level: ActivityLogLevel;
 }
