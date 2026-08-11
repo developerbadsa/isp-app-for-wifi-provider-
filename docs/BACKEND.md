@@ -182,7 +182,10 @@ Profile matching logic in `createPPPoESecret`: exact profile name → `${speed}M
 - `.env` → `VITE_API_URL=/api` (relative). Vite `server.proxy` (and `preview.proxy`) forwards `/api` → `http://localhost:5000` in dev.
 - Result: dev requests are **same-origin** — no CORS at all, works from LAN/Tailscale devices too (`http://<host-ip>:8080`).
 - Production: keep `/api` behind a reverse proxy, or set `VITE_API_URL` to the full backend URL at build time (origin must be in `CORS_ORIGINS`).
+- **`frontend-webapp/.env.production` (committed, 2026-08-12):** pins `VITE_API_URL=https://isp-api.rahimbadsa.me/api`. Vite loads it automatically in **production** builds, so CI/CD and fresh clones always bake the correct **https** URL — no manual `.env` juggling, no mixed-content (panel https → API http = browser block).
 - `src/lib/api.ts` now surfaces clear messages for network/CORS failures and non-JSON responses instead of a generic error.
+
+> 🚀 **Real-domain (VPS) step-by-step:** [`VPS_ENV_CORS_SETUP.md`](./VPS_ENV_CORS_SETUP.md) — `.env` keys, rebuild, PM2 repoint, verification commands.
 
 ---
 
@@ -196,6 +199,9 @@ Profile matching logic in `createPPPoESecret`: exact profile name → `${speed}M
 
 - Dev: `npm run dev` (nodemon)
 - Prod: `npm run build` → `npm start` (or PM2: `pm2 start dist/index.js --name isp-backend`)
+- **CI/CD (2026-08-12):** GitHub Actions (`.github/workflows/deploy.yml`) auto-deploys on push to `main` — builds backend + frontend on the runner, then SSH (via Tailscale) into the VPS and builds the **canonical clone** `/var/www/mern/isp-app-server` (the SAME clone nginx serves and PM2 runs from). Frontend builds use the committed `.env.production` → https API URL.
+- PM2: `ecosystem.config.js` codifies app config (script path, logs, memory, `time: true` timestamps); `pm2-logrotate` rotates logs daily (50MB cap, 14-day retention). `pm2 logs isp-app-server` = live console, nodemon-er moto.
+- 1-command deploy on the VPS: `./deploy.sh` (git pull → install → build → pm2 restart → health check).
 - Full VPS setup: `deploy-ubuntu.sh` + `DEPLOYMENT_UBUNTU.md` in `isp-app-system/`
 - Reverse proxy: Nginx (`/api` → localhost:5000)
 

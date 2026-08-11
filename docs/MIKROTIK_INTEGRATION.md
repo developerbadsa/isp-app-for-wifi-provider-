@@ -68,6 +68,8 @@ Recommendation: start with **poll & store** (Low effort, good enough for a usage
 
 > The web admin (`frontend-webapp`) already shows live usage in the **customer details dialog** via `GET /api/customers/:id/live` (auto-refreshes every 30s with a manual refresh button).
 
+> 🖥️ **Admin dashboard — "Network Live" card (2026-08-12):** router health (identity, version, CPU load, uptime) + online PPPoE session count and top sessions (username / IP / uptime) via `GET /api/mikrotik/status` + `GET /api/mikrotik/active`, auto-refresh 30s. Router unreachable hole clean "Router Offline" state dekhiye (`connected:false` gracefully handled).
+
 ---
 
 ## 4. Matching customers ↔ PPPoE users

@@ -8,7 +8,7 @@
 
 | Area | Status | Details |
 |---|---|---|
-| Admin panel (web) | ✅ Working | Dashboard (KPIs), Customers (search/filter/paginate), Customer details (profile, invoices, tickets, **live usage**, **ONU dBm**), Settings (MikroTik integration) |
+| Admin panel (web) | ✅ Working | Dashboard (KPIs + **Network Live MikroTik widgets** + monthly collection rate + package distribution), Customers (search/filter/paginate), Customer details (profile, invoices, tickets, **live usage**, **ONU dBm**), Settings (MikroTik integration + **Internet Packages CRUD**) |
 | Backend API | ✅ Working | Express + Prisma + PostgreSQL. JWT auth, customer CRUD + **auto MikroTik provisioning**, packages, invoices, tickets |
 | MikroTik integration | ✅ Working | Live connection (ROS 7.21.5), PPPoE secrets, active sessions, **live usage (bytes + speed + speed-limit)**, suspend/resume |
 | ONU optical power (dBm) | ✅ Working | Manual entry + color-coded badge (Good/Acceptable/Weak/Problematic) |
@@ -64,6 +64,8 @@
   > 📄 **Smart design ready:** [`ONU_DBM_SMART_SOLUTION.md`](./ONU_DBM_SMART_SOLUTION.md) — OLT/TR-069/manual 3 source, pluggable adapter, customer↔ONU mapping, auto-alert flow
 
 **Done when:** Admin dashboard e "ek nojore" dekhte pare: koto customer online, koto speed, kon zone e problem, kokhon theke offline.
+
+> ✅ **Progress (2026-08-12):** Dashboard **Network Live** card shipped — router health (identity/version/CPU load/uptime) + online PPPoE session count & list (username/IP/uptime), auto-refresh 30s via `GET /api/mikrotik/status` + `GET /api/mikrotik/active`. Remaining in Goal 2: usage history snapshots, per-zone traffic, alerts, per-customer speed test.
 
 > This is where MikroTik knowledge compounds — the live-usage foundation (already built) makes this cheap to add.
 
