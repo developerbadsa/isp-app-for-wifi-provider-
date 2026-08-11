@@ -75,7 +75,7 @@ Every call hits the router live. Add a 5–10 s TTL cache (in-memory) for `/acti
 - Keep the DB write first + mark `provisioning: pending`, then sync the router in the background (the code already handles drift with warnings — extend that pattern)
 
 ### 11. Missing per-customer usage endpoint
-**✅ Done** — `GET /api/customers/:id/live` runs `/ppp/active/print stats`, matches session by `pppoeUsername`, returns bytes-in/bytes-out, uptime, IP, MAC. Web admin details dialog shows it (30s auto-refresh + manual refresh). (See `MIKROTIK_INTEGRATION.md` §3.)
+**✅ Done** — `GET /api/customers/:id/live` matches session by `pppoeUsername` and returns bytes-in/bytes-out (from the dynamic `<pppoe-<user>>` interface counters — ROS 7.21 has no `stats` param), uptime, IP, MAC. Web admin details dialog shows it (30s auto-refresh + manual refresh). (See `MIKROTIK_INTEGRATION.md` §3.)
 
 ### 12. No graceful shutdown
 Close Prisma + the router connection on `SIGTERM`/`SIGINT`:

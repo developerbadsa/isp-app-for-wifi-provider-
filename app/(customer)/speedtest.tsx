@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { useAppStore } from '../../src/store';                 
-import { lightTheme, darkTheme } from '../../src/utils/theme.ts'; 
+import { lightTheme, darkTheme } from '../../src/utils/theme'; 
 import { Header } from '../../src/components/Header';          
 import { Card } from '../../src/components/Card';           
 

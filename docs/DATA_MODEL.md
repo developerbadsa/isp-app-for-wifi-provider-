@@ -179,7 +179,9 @@ The real system has a backend (`isp-app-server`, Express + Prisma + PostgreSQL) 
 | Mobile type | Prisma model | Notes |
 |---|---|---|
 | `User` | `User` | Backend uses `email` + `passwordHash` + `role` (STAFF/ADMIN) — the mobile app currently has its own demo login |
-| `CustomerUser` | `Customer` | Backend stores `name, phone, pppoeUsername, pppoePassword, zone, status, packageId` — **no** MAC/IP/uptime in DB; those come live from MikroTik |
+| `CustomerUser` | `Customer` | Backend stores `name, phone, pppoeUsername, pppoePassword, zone, status, packageId, onuRxPower, onuTxPower` — **no** MAC/IP/uptime in DB; those come live from MikroTik |
+
+> **ONU optical power (`onuRxPower` / `onuTxPower`, dBm):** recorded manually (admin reads the ONU web UI, e.g. `-18.5`), color-coded in the admin details dialog. MikroTik **cannot** provide dBm (it sees only the Ethernet/PPPoE side — optical readings live on the OLT↔ONU fiber link). A future OLT/SNMP integration can auto-fill these fields.
 | `Package` | `Package` | `speedMbps`, `price`, `validityDays` — same fields |
 | `Invoice` | `Invoice` + `Payment` | Backend splits payments into their own table |
 | `Ticket` | `Ticket` | Same concept |

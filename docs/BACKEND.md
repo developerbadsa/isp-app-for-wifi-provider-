@@ -37,6 +37,8 @@ isp-app-server/
 │   └── schema.prisma        # Data model (PostgreSQL)
 ├── src/
 │   ├── index.ts             # Express app, middleware, route mounting, cron start
+│   ├── config/
+│   │   └── cors.config.ts   # Smart CORS allowlist (dev LAN/localhost, prod CORS_ORIGINS)
 │   ├── controllers/         # Request handlers
 │   │   ├── auth.controller.ts
 │   │   ├── customer.controller.ts
@@ -113,6 +115,7 @@ All routes except `/api/health`, `/api/auth/login`, `/api/auth/register` require
 User      { id, name, email @unique, passwordHash, role: STAFF|ADMIN }
 Customer  { id, name, phone @unique, pppoeUsername @unique, pppoePassword,
             zone?, status: ACTIVE|SUSPENDED|OVERDUE, packageId → Package,
+            onuRxPower?, onuTxPower?,   // ONU optical power (dBm), manual/OLT-sourced
             invoices[], tickets[] }
 Package   { id, name @unique, speedMbps, price, validityDays, customers[] }
 Invoice   { id, amount, dueDate, paidAt?, status, customerId → Customer, payments[] }
@@ -133,12 +136,15 @@ Ticket    { id, ..., customerId?, assigneeId? → User, messages }
 | `DATABASE_URL` | **yes** | PostgreSQL connection string |
 | `JWT_SECRET` | **yes** | Signing secret — keep strong & private |
 | `JWT_EXPIRES_IN` | no | (jwt.ts hardcodes `7d` today) |
-| `MIKROTIK_HOST` | yes | Router IP (currently `192.168.110.199`) |
+| `MIKROTIK_HOST` | yes | Router IP (currently `192.168.122.82`) |
 | `MIKROTIK_PORT` | no (default 8728) | RouterOS API port |
 | `MIKROTIK_USERNAME` | yes | Router API user |
 | `MIKROTIK_PASSWORD` | yes | Router API password |
 | `MIKROTIK_TIMEOUT_MS` | no (default 5000) | Router call timeout |
 | `MIKROTIK_TLS` | no | `true` → connect to api-ssl (8729) |
+| `CORS_ORIGINS` | no | Comma-separated **production** allowlist (e.g. `https://panel.example.com`). In dev, localhost/127.0.0.1 + private LAN (10.x, 172.16-31.x, 192.168.x, 100.64.x Tailscale) are allowed automatically |
+
+> 📄 Full template: `.env.example` (all keys documented — copy to `.env`).
 
 ---
 
@@ -151,13 +157,32 @@ All in `src/services/mikrotik.service.ts` (uses `node-routeros`):
 | `checkMikroTikConnection` | `/system/identity/print`, `/system/resource/print` | `GET /api/mikrotik/status` |
 | `getPPPoESecrets` | `/ppp/secret/print` | `GET /api/mikrotik/secrets` |
 | `getActivePPPoESessions` | `/ppp/active/print` | `GET /api/mikrotik/active` |
-| `getPPPoESessionStats` | `/ppp/active/print stats` | `GET /api/customers/:id/live` (bytes-in/out) |
+| `getPPPoESessionStats` | `/ppp/active/print` + `/interface/print` (merges `rx-byte`/`tx-byte` from dynamic `<pppoe-<user>>` interface; ROS 7.21 has no `stats` param) | `GET /api/customers/:id/live` (bytes-in/out) |
 | `createPPPoESecret` | `/ppp/profile/print`, `/ppp/secret/add|set` | Customer create + `POST /api/mikrotik/secrets` |
 | `togglePPPoESecret` | `/ppp/secret/set`, `/ppp/active/remove` | Customer status sync + `POST /api/mikrotik/toggle` |
 
 Profile matching logic in `createPPPoESecret`: exact profile name → `${speed}M` (e.g. `50M`) → create `50M` profile → fallback `default`.
 
 > 🔒 **Fail-fast connect:** `connectMikroTik` races the TCP connect against `MIKROTIK_TIMEOUT_MS` (default 5000), so an unreachable router host returns an error in ~5s instead of hanging the request for the OS TCP timeout.
+
+---
+
+## 6b. CORS (frontend ↔ backend)
+
+**Backend** (`src/config/cors.config.ts`):
+
+- Old behavior was `origin: true` — **any** origin allowed (works, but insecure).
+- Now: explicit `CORS_ORIGINS` allowlist for **production**; in **development** localhost/127.0.0.1 (any port) + private LAN ranges + Tailscale CGNAT are auto-allowed.
+- Rejected origins get a clean `403` JSON with instructions (add to `CORS_ORIGINS`).
+- `Access-Control-Allow-Private-Network: true` on all responses (Chrome Private Network Access).
+- Preflight cached 24h (`Access-Control-Max-Age: 86400`) → fewer OPTIONS round-trips.
+
+**Frontend** (`frontend-webapp`):
+
+- `.env` → `VITE_API_URL=/api` (relative). Vite `server.proxy` (and `preview.proxy`) forwards `/api` → `http://localhost:5000` in dev.
+- Result: dev requests are **same-origin** — no CORS at all, works from LAN/Tailscale devices too (`http://<host-ip>:8080`).
+- Production: keep `/api` behind a reverse proxy, or set `VITE_API_URL` to the full backend URL at build time (origin must be in `CORS_ORIGINS`).
+- `src/lib/api.ts` now surfaces clear messages for network/CORS failures and non-JSON responses instead of a generic error.
 
 ---
 

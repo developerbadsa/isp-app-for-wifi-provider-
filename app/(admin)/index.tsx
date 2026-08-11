@@ -7,20 +7,66 @@ import { lightTheme, darkTheme } from '../../src/utils/theme';
 import { translations } from '../../src/utils/i18n';
 import { Card } from '../../src/components/Card';
 import { Header } from '../../src/components/Header';
+import { mockActivityLogs, mockUsers } from '../../src/utils/mockData';
+import type { ActivityLog } from '../../src/types';
+
+const currency = '\u09F3';
+
+const formatNumber = (value: number) => value.toLocaleString('en-US');
+
+const formatCurrency = (value: number) => `${currency}${formatNumber(value)}`;
+
+const getPaymentAmount = (activity: ActivityLog) => {
+  const amount = activity.detail?.match(/[\d,]+/)?.[0];
+  return amount ? Number(amount.replace(/,/g, '')) : 0;
+};
+
+const getActivityTime = (timestamp: string, referenceTime: number) => {
+  const diffMs = Math.max(referenceTime - new Date(timestamp).getTime(), 0);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+  if (diffHours < 1) return 'Just now';
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+};
 
 export default function AdminDashboard() {
   const router = useRouter();
   const { theme, language } = useAppStore();
   const colors = theme === 'light' ? lightTheme : darkTheme;
   const t = translations[language];
-  
+
+  const activeSubscribers = mockUsers.filter(user => user.status !== 'suspended').length;
+  const monthlyRevenue = mockUsers
+    .filter(user => user.status !== 'suspended')
+    .reduce((total, user) => total + user.price, 0);
+  const pastDueCustomers = mockUsers.filter(user => user.status === 'past_due').length;
+  const successfulPayments = mockActivityLogs.filter(
+    activity => activity.type === 'payment' && activity.level === 'success',
+  );
+  const latestPaymentDate = successfulPayments
+    .map(activity => activity.timestamp.slice(0, 10))
+    .sort()
+    .at(-1);
+  const todaysPayments = successfulPayments
+    .filter(activity => activity.timestamp.startsWith(latestPaymentDate ?? ''))
+    .reduce((total, activity) => total + getPaymentAmount(activity), 0);
+  const latestActivityTime = Math.max(
+    ...mockActivityLogs.map(activity => new Date(activity.timestamp).getTime()),
+  );
+  const recentActivities = [...mockActivityLogs]
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 3);
+
   const kpiCards = [
-    { title: 'Active Subscribers', value: '1,234', icon: 'people-outline', color: colors.colors.success },
-    { title: 'Monthly Revenue', value: '৳1,23,450', icon: 'trending-up-outline', color: colors.colors.primary },
-    { title: "Today's Payments", value: '৳45,600', icon: 'card-outline', color: colors.colors.accent },
-    { title: 'Past Due', value: '23', icon: 'warning-outline', color: colors.colors.error },
+    { title: 'Active Subscribers', value: formatNumber(activeSubscribers), icon: 'people-outline', color: colors.colors.success },
+    { title: 'Monthly Revenue', value: formatCurrency(monthlyRevenue), icon: 'trending-up-outline', color: colors.colors.primary },
+    { title: "Today's Payments", value: formatCurrency(todaysPayments), icon: 'card-outline', color: colors.colors.accent },
+    { title: 'Past Due', value: formatNumber(pastDueCustomers), icon: 'warning-outline', color: colors.colors.error },
   ];
-  
+
   const menuItems = [
     { title: 'Customers', icon: 'people-outline', route: '/customers', color: colors.colors.primary },
     { title: 'Subscriptions', icon: 'wifi-outline', route: '/subscriptions', color: colors.colors.success },
@@ -28,11 +74,18 @@ export default function AdminDashboard() {
     { title: 'Invoices', icon: 'receipt-outline', route: '/invoices', color: colors.colors.accent },
     { title: 'Settings', icon: 'settings-outline', route: '/settings', color: colors.colors.muted },
   ];
-  
+
+  const getActivityColor = (activity: ActivityLog) => {
+    if (activity.level === 'success') return colors.colors.success;
+    if (activity.level === 'warning') return colors.colors.warning;
+    if (activity.level === 'error') return colors.colors.error;
+    return colors.colors.primary;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.colors.background }]}>
       <Header title="Admin Dashboard" />
-      
+
       <ScrollView style={styles.content}>
         {/* KPI Cards */}
         <View style={styles.kpiGrid}>
@@ -52,15 +105,15 @@ export default function AdminDashboard() {
             </Card>
           ))}
         </View>
-        
+
         {/* Quick Actions */}
         <Text style={[styles.sectionTitle, { color: colors.colors.text }]}>
           Quick Actions
         </Text>
         <View style={styles.menuGrid}>
           {menuItems.map((item, index) => (
-            <TouchableOpacity 
-              key={index} 
+            <TouchableOpacity
+              key={index}
               onPress={() => router.push(item.route as any)}
             >
               <Card style={styles.menuCard}>
@@ -76,40 +129,24 @@ export default function AdminDashboard() {
             </TouchableOpacity>
           ))}
         </View>
-        
+
         {/* Recent Activity */}
         <Card style={styles.activityCard}>
           <Text style={[styles.sectionTitle, { color: colors.colors.text }]}>
             Recent Activity
           </Text>
           <View style={styles.activityList}>
-            <View style={styles.activityItem}>
-              <View style={[styles.activityDot, { backgroundColor: colors.colors.success }]} />
-              <Text style={[styles.activityText, { color: colors.colors.text }]}>
-                New customer registration: John Doe
-              </Text>
-              <Text style={[styles.activityTime, { color: colors.colors.textSecondary }]}>
-                2h ago
-              </Text>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={[styles.activityDot, { backgroundColor: colors.colors.warning }]} />
-              <Text style={[styles.activityText, { color: colors.colors.text }]}>
-                Payment received: ৳950
-              </Text>
-              <Text style={[styles.activityTime, { color: colors.colors.textSecondary }]}>
-                4h ago
-              </Text>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={[styles.activityDot, { backgroundColor: colors.colors.error }]} />
-              <Text style={[styles.activityText, { color: colors.colors.text }]}>
-                New support ticket: #234
-              </Text>
-              <Text style={[styles.activityTime, { color: colors.colors.textSecondary }]}>
-                6h ago
-              </Text>
-            </View>
+            {recentActivities.map(activity => (
+              <View key={activity.id} style={styles.activityItem}>
+                <View style={[styles.activityDot, { backgroundColor: getActivityColor(activity) }]} />
+                <Text style={[styles.activityText, { color: colors.colors.text }]}>
+                  {activity.detail ? `${activity.title}: ${activity.detail}` : activity.title}
+                </Text>
+                <Text style={[styles.activityTime, { color: colors.colors.textSecondary }]}>
+                  {getActivityTime(activity.timestamp, latestActivityTime)}
+                </Text>
+              </View>
+            ))}
           </View>
         </Card>
       </ScrollView>

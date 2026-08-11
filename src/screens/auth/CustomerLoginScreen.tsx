@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppStore } from '../../store';
 import { lightTheme, darkTheme } from '../../utils/theme';
 import { translations } from '../../utils/i18n';
 import { Card } from '../../components/Card';
+import { customerDemoCredentials, isDemoLoginEnabled } from '../../config/demoLogin';
 
 export const CustomerLoginScreen: React.FC = () => {
   const router = useRouter();
@@ -13,21 +14,21 @@ export const CustomerLoginScreen: React.FC = () => {
   const t = translations[language];
   
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
+  const [phone, setPhone] = useState(isDemoLoginEnabled ? customerDemoCredentials.phone : '');
+  const [otp, setOtp] = useState(isDemoLoginEnabled ? customerDemoCredentials.otp : '');
   const [error, setError] = useState('');
   
   const handlePhoneSubmit = () => {
-    if (phone === '01877104723') {
+    if (phone === customerDemoCredentials.phone) {
       setStep('otp');
       setError('');
     } else {
-      setError('Invalid phone number. Use test account: 01700000000');
+      setError(`Invalid phone number. Use test account: ${customerDemoCredentials.phone}`);
     }
   };
   
   const handleOtpSubmit = () => {
-    if (otp === '123456') {
+    if (otp === customerDemoCredentials.otp) {
       const user = {
         id: '1',
         role: 'customer' as const,
@@ -39,15 +40,13 @@ export const CustomerLoginScreen: React.FC = () => {
       login(user);
       router.replace('/(customer)');
     } else {
-      setError('Invalid OTP. Use test OTP: 123456');
+      setError(`Invalid OTP. Use test OTP: ${customerDemoCredentials.otp}`);
     }
   };
   
   const useTestAccount = () => {
-    setPhone('01877104723');
-    if (step === 'otp') {
-      setOtp('123456');
-    }
+    setPhone(customerDemoCredentials.phone);
+    setOtp(customerDemoCredentials.otp);
   };
   
   return (
@@ -71,7 +70,7 @@ export const CustomerLoginScreen: React.FC = () => {
                 }]}
                 value={phone}
                 onChangeText={setPhone}
-                placeholder="01700000000"
+                placeholder={customerDemoCredentials.phone}
                 placeholderTextColor={colors.colors.textSecondary}
                 keyboardType="phone-pad"
               />
@@ -105,7 +104,7 @@ export const CustomerLoginScreen: React.FC = () => {
                 }]}
                 value={otp}
                 onChangeText={setOtp}
-                placeholder="123456"
+                placeholder={customerDemoCredentials.otp}
                 placeholderTextColor={colors.colors.textSecondary}
                 keyboardType="number-pad"
                 maxLength={6}

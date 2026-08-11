@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { useAppStore } from '../src/store';
 
 export default function RootLayout() {
-  const { initialize, isAuthenticated, user } = useAppStore();
+  const { initialize } = useAppStore();
   
   useEffect(() => {
     initialize();

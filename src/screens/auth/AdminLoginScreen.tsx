@@ -5,6 +5,7 @@ import { useAppStore } from '../../store';
 import { lightTheme, darkTheme } from '../../utils/theme';
 import { translations } from '../../utils/i18n';
 import { Card } from '../../components/Card';
+import { adminDemoCredentials, isDemoLoginEnabled } from '../../config/demoLogin';
 
 export const AdminLoginScreen: React.FC = () => {
   const router = useRouter();
@@ -12,12 +13,12 @@ export const AdminLoginScreen: React.FC = () => {
   const colors = theme === 'light' ? lightTheme : darkTheme;
   const t = translations[language];
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(isDemoLoginEnabled ? adminDemoCredentials.email : '');
+  const [password, setPassword] = useState(isDemoLoginEnabled ? adminDemoCredentials.password : '');
   const [error, setError] = useState('');
   
   const handleLogin = () => {
-    if (email === 'admin@demo.isp' && password === 'admin123') {
+    if (email === adminDemoCredentials.email && password === adminDemoCredentials.password) {
       const user = {
         id: 'admin1',
         role: 'admin' as const,
@@ -28,13 +29,15 @@ export const AdminLoginScreen: React.FC = () => {
       login(user);
       router.replace('/(admin)');
     } else {
-      setError('Invalid credentials. Use test account: admin@demo.isp / admin123');
+      setError(
+        `Invalid credentials. Use test account: ${adminDemoCredentials.email} / ${adminDemoCredentials.password}`,
+      );
     }
   };
   
   const useTestAccount = () => {
-    setEmail('admin@demo.isp');
-    setPassword('admin123');
+    setEmail(adminDemoCredentials.email);
+    setPassword(adminDemoCredentials.password);
   };
   
   return (
@@ -56,7 +59,7 @@ export const AdminLoginScreen: React.FC = () => {
             }]}
             value={email}
             onChangeText={setEmail}
-            placeholder="admin@demo.isp"
+            placeholder={adminDemoCredentials.email}
             placeholderTextColor={colors.colors.textSecondary}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -73,7 +76,7 @@ export const AdminLoginScreen: React.FC = () => {
             }]}
             value={password}
             onChangeText={setPassword}
-            placeholder="admin123"
+            placeholder={adminDemoCredentials.password}
             placeholderTextColor={colors.colors.textSecondary}
             secureTextEntry
           />

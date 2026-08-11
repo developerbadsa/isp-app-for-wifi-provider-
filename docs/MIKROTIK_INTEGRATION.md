@@ -17,13 +17,7 @@ Everything we know about the live router, how the backend talks to it, and how t
 | PPPoE secrets | `testuser`, `user2`, `user5m-1..10`, `user10m-1..10`, `test_pppoe_...`, `rayhan-pppoe` (20M), `Dulufa` (20M) |
 | Active session (at check time) | `testuser` — MAC `52:54:00:62:32:A3`, IP `10.10.10.99`, uptime `20h25m9s` |
 
-### ⚠️ Two things to verify on the router
-1. **Router's own IP** — run `/ip address print`. The backend's `.env` points at `MIKROTIK_HOST=192.168.110.199` — confirm that's this router.
-2. **API access restriction** — the command `/ip service set api address=192.168.88.10/32` was run. `192.168.88.10` must be the **backend machine's IP**, or the backend will be locked out. To fix:
-   ```bash
-   /ip service set api address=<backend-server-ip>/32
-   ```
-   (To allow any LAN client while testing, use `0.0.0.0/0` — but restrict again afterwards.)
+> ✅ **RESOLVED (Aug 2026):** Router IP is `192.168.122.82` (`MIKROTIK_HOST` in `.env`), API allowlist = `192.168.122.1/32,192.168.110.103/32`, and the local-dev → router path is fully wired up. See **[`MIKROTIK_CONNECTIVITY_SETUP.md`](./MIKROTIK_CONNECTIVITY_SETUP.md)** for the 3-layer fix (Windows route → router allowlist → host iptables), verification steps, and gotchas.
 
 ---
 
@@ -39,15 +33,16 @@ Everything we know about the live router, how the backend talks to it, and how t
 ## 3. Getting **usage** ("leasure koto passe")
 
 ### ✅ Live session usage (current session only)
-On RouterOS 7 the cumulative bytes for active sessions come from the **stats** flag:
+> ⚠️ **Verified on RouterOS 7.21.5:** `/ppp active print stats` does **NOT** exist — the router rejects `=stats=yes` with `unknown parameter stats`. Per-session bytes live on the **dynamic `pppoe-in` interfaces** instead:
 
 ```bash
-/ppp active print stats
+/interface print
+# <pppoe-testuser>  pppoe-in  dyn:true  rx-byte:1840  tx-byte:672  link-downs:0
 ```
 
-> The plain `/ppp active print` shows only name/service/caller-id/address/uptime (exactly what your earlier output showed). Adding `stats` returns **bytes-in / bytes-out / packets** per active user.
+> Each active session creates a dynamic interface named `<pppoe-<username>>` — `rx-byte` = download (bytes-in), `tx-byte` = upload (bytes-out). `/ppp active print` gives session metadata (uptime, address/IP, caller-id/MAC, session-id); the matching interface adds the byte counters.
 
-**✅ Implemented** in the backend (`getPPPoESessionStats` sends `/ppp/active/print` with `=stats=yes`):
+**✅ Implemented** in the backend (`getPPPoESessionStats` fetches `/ppp/active/print` + `/interface/print` and merges `bytes-in`/`bytes-out` from the matching `<pppoe-<name>>` interface; also handles the router's `!empty` reply as "no sessions"):
 
 ```
 GET /api/customers/:id/live           → usage for ONE customer (matches session by pppoeUsername)
@@ -67,7 +62,7 @@ The router does **not** store per-user totals across sessions. Options:
 |---|---|---|
 | **RADIUS accounting** (FreeRADIUS + MySQL) | High (new server + router config) | Per-session + monthly totals, ISP standard |
 | `/ip accounting` on the router | Medium | Per-IP traffic snapshots (resets on snapshot) |
-| Poll & store in DB | Low | Backend polls `/ppp active print stats` every N min, writes to a `usage_snapshots` table → cumulative approximations |
+| Poll & store in DB | Low | Backend polls `/ppp active print` + `<pppoe-*>` interface counters every N min, writes to a `usage_snapshots` table → cumulative approximations |
 
 Recommendation: start with **poll & store** (Low effort, good enough for a usage card), move to **RADIUS** when billing needs real quotas.
 
@@ -111,9 +106,11 @@ No naming convention change needed.
 # PPPoE users
 /ppp secret print
 
-# Active sessions + USAGE
+# Active sessions
 /ppp active print
-/ppp active print stats
+
+# USAGE (bytes) — per-session dynamic pppoe-in interface
+/interface print where type=pppoe-in
 
 # Session live rate (per session)
 /ppp active monitor numbers=0 once
